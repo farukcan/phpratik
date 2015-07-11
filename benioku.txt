@@ -1,0 +1,29 @@
+Gereksinimler:
+1-
+	php'nin her klasöre yazma ve okuma yetkisine sahip olması gerekir.
+2-
+/css
+/img
+/js
+	klasörlerine dışarıdan sorunsuz erişim olmalı
+
+3- apache'nin rewrite özelliği açık olmalı
+
+
+Güvenlik için dikkat
+
+-1
+/sayfa
+/kontrol
+/sistem
+	klasörlerine dıştan erişimin mümkünlüğü kontrol edilmelidir.
+
+
+-2
+developer_username 
+developer_password
+değerleri güvenli bir şekilde seçilmelidir. 
+
+
+
+Bu uygulama GPL lisansına sahiptir.

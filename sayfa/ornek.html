@@ -1,0 +1,57 @@
+
+
+SAYFAlarda mantıksal ve döngüsel kullanımlar <br>
+
+@if(false)
+	if-oldu lan !
+@elseif(true)
+	elseif-habi oldu
+@endif
+
+<br>
+
+
+
+
+@if(false)
+olmadı
+@else
+<b>else-oldu!!!</b>
+@endif
+
+<br>
+
+@for($i=0;$i<5;$i++)
+	{{ ($i+1) }} . şey
+@endfor
+
+<br><br>
+
+
+bir arrayi foreach ile bastıralım:
+
+@foreach($ali as $a)
+	{{ var_dump($a) }}
+@endforeach
+
+<br>
+
+Sayfa2 : {{ $sayfa2 }}
+
+3 süslü parantez sayfaya bastırılmaz -|{{{ $i = 6;$b=0;$c=50}}}|- <br>
+
+
+
+{{ $i }} ' den geri say :
+
+
+@while($i--)
+	{{ $i }} -
+@end
+
+
+C değeri : {{ $c; }}
+
+
+@DahilEt('ornek2')
+

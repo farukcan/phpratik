@@ -1,0 +1,1534 @@
+<?php $__rotaAyar=array (
+  'model' => 
+  array (
+    'user' => 'root',
+    'pass' => '',
+    'dbname' => 'kelime',
+    'host' => 'localhost',
+    'type' => 'mysql',
+    'charset' => 'utf8',
+    'prefix' => '',
+  ),
+  'sayfa' => 
+  array (
+    'klasor' => 'sayfa/',
+    'ayrac' => '@',
+  ),
+  'vt' => 
+  array (
+    'user' => 'root',
+    'pass' => '',
+    'dbname' => 'kelime',
+    'host' => 'localhost',
+    'type' => 'mysql',
+    'charset' => 'utf8',
+    'prefix' => '',
+  ),
+);?><?php
+class Vt
+{
+	
+	static function pdox()
+	{
+
+		Vt::check();
+		return $GLOBALS['_pdox'];
+	}
+
+	static function check(){
+		if(!isset($GLOBALS['_pdox'])) $GLOBALS['_pdox'] = new PDOx($GLOBALS['__rotaAyar']['vt']);	
+	}
+
+	static function sor()
+	{
+		return Vt::pdox();
+	}
+	static function sorgu()
+	{
+		return Vt::pdox();
+	}
+}
+
+/*
+*
+* PHP PDO Database Class for MySQL, PostgreSQL and SQLite
+*
+* @ Author: izni burak demirtas / @izniburak <info@burakdemirtas.org>
+*
+* @ Web: http://burakdemirtas.org
+*
+* @ Docs: http://burakdemirtas.org/pdox-kullanisli-pdo-sinifi-php/
+*
+* @ Licence: The MIT License (MIT) - Copyright (c) 2014 - http://opensource.org/licenses/MIT
+*
+*/
+
+class PDOx {
+
+	public $pdo = null;
+	
+	private $select = '*';
+	private $from = null;
+	private $where = null;
+	private $limit = null;
+	private $join = null;
+	private $order_by = null;
+	private $group_by = null;
+	private $having = null;
+	private $num_rows = 0;
+	private $insert_id = null;
+	private $query = null;
+	private $error = null;
+	private $result = array();
+	private $prefix = null;
+	private $op = array('=','!=','<','>','<=','>=','<>');
+
+	public function __construct($config) {
+		
+		$config['type'] 	= ((@$config['type']) ? $config['type'] : 'mysql');
+		$config['host'] 	= ((@$config['host']) ? $config['host'] : 'localhost');
+		$config['charset'] 	= ((@$config['charset']) ? $config['charset'] : 'utf8');
+		$config['prefix'] 	= ((@$config['prefix']) ? $config['prefix'] : '');
+		$this->prefix		= $config['prefix'];
+	
+		$dsn = '';
+	
+		if ($config['type'] == 'mysql' || $config['type'] == '' || $config['type'] == 'pgsql') {
+		
+			$dsn = $config['type'] . ':host=' . $config['host'] . ';dbname=' . $config['dbname'];
+			
+		} elseif ($config['type'] == 'sqlite') {
+			
+			$dsn = 'sqlite:' . $config['dbname'] . ($config['dbname'] == ':memory:' ? '' : '.sqlite');
+				
+		} elseif($config['type'] == 'oracle') {
+			
+			$dsn = 'oci:dbname=' . $config['host'] . '/' . $config['dbname'];
+			
+		}
+		
+		try {
+		
+			$this->pdo = new PDO($dsn, $config['user'], $config['pass']);
+			
+			$charset = $config['charset'];
+			
+			$this->pdo->exec("SET NAMES '".$charset."'");
+			$this->pdo->exec("SET CHARACTER SET '".$charset."'");
+			$this->pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+			
+		} catch (PDOException $e) {
+		
+			die('Cannot the connect to Database with PDO.<br /><br />'.$e->getMessage());
+			
+		}
+
+		return $this->pdo;
+	
+	}
+	
+	public function select($select='*') {
+	
+		$this->select = $select;
+		
+		return $this;
+		
+    	}
+
+	public function from($from) {
+	
+		$this->from = $this->prefix . $from;
+		
+		return $this;
+		
+	}
+	
+	public function join($table, $field1, $op = '', $field2 = '', $join = 'INNER') {
+	
+		$where = (!in_array($op, $this->op) ? $field1 . ' = ' . $op : $field1 . ' ' . $op . ' ' . $field2);
+		$table = $this->prefix . $table;
+	
+		if (is_null($this->join)) {
+		
+			$this->join = " " . $join . " JOIN" . " " . $table . " ON " . $where;
+			
+		} else {
+		
+			$this->join = $this->join . " " . $join . " JOIN" . " " . $table . " ON " . $where;
+			
+		}
+		
+		return $this;
+		
+	}
+	
+	public function leftJoin($table, $field1, $op = '', $field2 = '') {
+	
+		$this->join($table, $field1, $op, $field2, 'LEFT');
+		
+		return $this;
+		
+	}
+	
+	public function rightJoin($table, $field1, $op = '', $field2 = '') {
+	
+		$this->join($table, $field1, $op, $field2, 'RIGHT');
+		
+		return $this;
+		
+	}
+
+	public function where($where, $op = null, $val = null, $ao = 'AND') {
+	
+		if (is_array($where)) {
+		
+			$_where = array();
+			
+			foreach ($where as $column => $data) {
+			
+				$_where[] = $column . '=' . $this->escape($data);
+				
+			}
+			
+			$where = implode(' '.$ao.' ', $_where);
+        
+		} else {
+		
+			if (!in_array($op, $this->op)) {
+		
+				$where = $where . ' = ' . $this->escape($op);
+			
+			} else {
+			
+				$where = $where . ' ' . $op . ' ' . $this->escape($val);
+				
+			}
+		
+		}
+		
+		if (is_null($this->where)) {
+		
+			$this->where = $where;
+			
+		} else {
+		
+			$this->where = $this->where . ' '.$ao.' ' . $where;
+			
+		}
+		
+		return $this;
+		
+	}
+
+	public function orWhere($where, $op=null, $val=null) {
+	
+		$this->where($where, $op, $val, 'OR');
+		
+		return $this;
+		
+	}
+	
+	public function whereIn($field, $keys, $ao = '') {
+	
+		if (is_array($keys)) {
+		
+			$_keys = array();
+			
+			foreach ($keys as $k => $v) {
+			
+				$_keys[] = (is_numeric($v) ? $v : $this->escape($v));
+				
+			}
+			
+			$keys = implode(', ', $_keys);
+			
+			if (is_null($this->where)) {
+		
+				$this->where = $field . ' IN (' . $keys . ')';
+			
+			} else {
+			
+				$this->where = $this->where . ' AND ' . $field . ' '.$ao.'IN (' . $keys . ')';
+				
+			}
+			
+		}
+		
+		return $this;
+		
+	}
+	
+	public function whereNotIn($field, $keys) {
+	
+		$this->where_in($field, $keys, 'NOT ');
+		
+		return $this;
+		
+	}
+	
+	public function like($field, $data, $type = '%-%', $ao = 'AND') {
+	
+		$like = '';
+		
+		if($type == '-%') { $like = $data.'%'; }
+		
+		elseif($type == '%-') { $like = '%'.$data; }
+		
+		else { $like = '%'.$data.'%'; }
+	
+		$like = $this->escape($like);
+		
+		if (is_null($this->where)) {
+		
+			$this->where = $field . ' LIKE ' . $like;
+			
+		} else {
+		
+			$this->where = $this->where . ' '.$ao.' ' . $field . ' LIKE ' . $like;
+			
+		}
+		
+		return $this;
+		
+	}
+	
+	public function orLike($field, $data, $type = '%-%') {
+	
+		$this->like($field, $data, $type, 'OR');
+		
+		return $this;
+		
+	}
+
+	public function limit($limit, $limitEnd = null) {
+	
+		if (!is_null($limitEnd)) {
+		
+			$this->limit = $limit . ', ' . $limitEnd;
+			
+		} else {
+		
+			$this->limit = $limit;
+			
+		}
+		
+		return $this;
+		
+	}
+
+	public function orderBy($order_by, $order_dir = null) {
+	
+		if (!is_null($order_dir)) {
+		
+			$this->order_by = $order_by . ' ' . $order_dir;
+			
+		} else {
+		
+			if(stristr($order_by, ' ') || $order_by == 'rand()') {
+			
+				$this->order_by = $order_by;
+				
+			} else {
+			
+				$this->order_by = $order_by . ' ASC';
+				
+			}
+			
+		}
+		
+		return $this;
+		
+	}
+
+	public function groupBy($group_by) {
+	
+		$this->group_by = $group_by;
+		
+		return $this;
+		
+	}
+	
+	public function having($field, $op = null, $val = null) {
+	
+		if (!in_array($op, $this->op)) {
+
+			$this->having = $field . ' > ' . $this->escape($op);
+	
+		} else {
+	
+			$this->having = $field . ' ' . $op . ' ' . $this->escape($val);
+		
+		}
+		
+		return $this;
+		
+	}
+
+	public function count() {
+	
+		return $this->num_rows;
+		
+	}
+	
+	public function insertId() {
+	
+		return $this->insert_id;
+		
+	}
+
+	public function error() {
+	
+		$msg = '<h1>Database Error</h1>';
+		$msg .= '<h4>Query: <em style="font-weight:normal;">"'.$this->query.'"</em></h4>';
+		$msg .= '<h4>Error: <em style="font-weight:normal;">'.$this->error.'</em></h4>';
+		die($msg);
+		
+	}
+	
+	public function get($array = false) {
+	
+		$query = "SELECT " . $this->select . " FROM " . $this->from;
+		
+		if (!is_null($this->join)) {
+		
+			$query = $query . $this->join;
+			
+		}
+		
+		if (!is_null($this->where)) {
+		
+			$query = $query . ' WHERE ' . $this->where;
+			
+		}
+		
+		if (!is_null($this->group_by)) {
+		
+			$query = $query . " GROUP BY " . $this->group_by;
+			
+		}
+		
+		if (!is_null($this->having)) {
+		
+			$query = $query . " HAVING " . $this->having;
+			
+		}
+		
+		if (!is_null($this->order_by)) {
+		
+			$query = $query . " ORDER BY " . $this->order_by;
+			
+		}
+		
+		$query  = $query . ' LIMIT 1';
+		
+		return $this->query($query, $array, false);
+		
+	}
+
+	public function getAll($array = false) {
+	
+		$query = "SELECT " . $this->select . " FROM " . $this->from;
+		
+		if (!is_null($this->join)) {
+		
+			$query = $query . $this->join;
+			
+		}
+		
+		if (!is_null($this->where)) {
+		
+			$query = $query . ' WHERE ' . $this->where;
+			
+		}
+		
+		if (!is_null($this->group_by)) {
+		
+			$query = $query . " GROUP BY " . $this->group_by;
+			
+		}
+		
+		if (!is_null($this->having)) {
+		
+			$query = $query . " HAVING " . $this->having;
+			
+		}
+		
+		if (!is_null($this->order_by)) {
+		
+			$query = $query . " ORDER BY " . $this->order_by;
+			
+		}
+		
+		$query = (!is_null($this->limit)) ? $query . "  LIMIT " . $this->limit : $query;
+		
+		return $this->query($query, $array);
+		
+	}
+
+	public function insert($data) {
+		
+		$columns = array_keys($data);
+		
+		$column = implode(',', $columns);
+		
+		$val = "" . implode(", ", array_map(array($this, 'escape'), $data)) . "";
+		
+		$query = 'INSERT INTO ' . $this->from . ' (' . $column . ') VALUES (' . $val . ')';
+		
+		$query = $this->query($query);
+		
+		if ($query) {
+			
+			$this->insert_id = $this->pdo->lastInsertId();
+			
+			return $this->insertId();
+			
+		}
+		
+	}
+
+	public function update($data) {
+	
+		$query = "UPDATE " . $this->from . " SET ";
+		
+		$values = array();
+		
+		foreach ($data as $column => $val) {
+		
+			$values[] = $column . "=" . $this->escape($val) . "";
+		
+		}
+		
+		$query = $query . (is_array($data) ? implode(',', $values) : $data);
+		
+		
+		if (!is_null($this->where)) {
+		
+			$query = $query . ' WHERE ' . $this->where;
+			
+		}
+		
+		if (!is_null($this->order_by)) {
+		
+			$query = $query . " ORDER BY " . $this->order_by;
+			
+		}
+		
+		$query = (!is_null($this->limit)) ? $query . "  LIMIT " . $this->limit : $query;
+		
+		return $this->query($query);
+		
+	}
+
+	public function delete() {
+	
+		$query = "DELETE FROM " . $this->from;
+		
+		if (!is_null($this->where)) {
+		
+			$query = $query . ' WHERE ' . $this->where;
+			
+			if (!is_null($this->order_by)) {
+			
+				$query = $query . " ORDER BY " . $this->order_by;
+				
+			}
+			
+			$query = (!is_null($this->limit)) ? $query . "  LIMIT " . $this->limit : $query;
+			
+		} else {
+		
+			$query = 'TRUNCATE TABLE ' . $this->from;
+			
+		}
+		
+		return $this->query($query);
+		
+	}
+	
+	public function query($query, $array = false, $all = true) {
+	
+		$this->reset();	
+		
+		$this->query = preg_replace('/\s\s+|\t\t+/', ' ', trim($query));
+		
+		$str = stristr($this->query, 'SELECT');
+		
+		if ($str) {
+		
+			$sql = $this->pdo->query($this->query);
+			
+			if ($sql) {
+			
+				$this->num_rows = $sql->rowCount();
+				
+				if (($this->num_rows > 0)) {
+				
+					if ($all) {
+					
+						while ($result = ($array == false) ? $sql->fetchAll(PDO::FETCH_OBJ) : $sql->fetchAll(PDO::FETCH_ASSOC)) {
+						
+							$q[] = $result;
+							
+						}
+						
+						$this->result = $q[0];
+						
+					} else {
+					
+						$q = ($array == false) ? $sql->fetch(PDO::FETCH_OBJ) : $sql->fetch(PDO::FETCH_ASSOC);
+						
+						$this->result = $q;
+						
+					}
+					
+				}
+				
+			}
+			
+			else {
+				
+				$this->error = $this->pdo->errorInfo();
+				$this->error = $this->error[2];
+				
+				return $this->error();
+				
+			}
+			
+		} elseif(!$str) {
+			$this->result = $this->pdo->query($this->query);
+			
+			if(!$this->result) {
+			
+				$this->error = $this->pdo->errorInfo();
+				$this->error = $this->error[2];
+				
+				return $this->error();
+				
+			}
+			
+		}
+		
+		return $this->result;
+		
+	}
+	
+	public function escape($data) {
+		
+		return $this->pdo->quote(trim($data));
+		
+	}
+	
+	private function reset() {
+		
+		$this->select = '*';
+		$this->from = null;
+		$this->where = null;
+		$this->limit = null;
+		$this->order_by = null;
+		$this->group_by = null;
+		$this->having = null;
+		$this->join = null;
+		$this->num_rows = 0;
+		$this->insert_id = null;
+		$this->query = null;
+		$this->error = null;
+		$this->result = array();
+		
+        	return;
+		
+	}
+	
+	function __destruct() {
+	
+		$this->pdo = null;
+	
+	}
+
+}
+?><?php
+/**
+*  A simple database abstraction layer for PHP 5.3+ with very minor configuration required
+*
+*  * database table columns are auto detected and made available as public members of the class
+*  * provides CRUD, dynamic counters/finders on a database table
+*  * uses PDO for data access and exposes PDO if required
+*  * class members used to do the magic are preceeded with an underscore, be careful of column names starting with _ in your database!
+*  * requires php >=5.3 as uses "Late Static Binding" and namespaces
+*
+*  BSD Licensed.
+*
+*  Copyright (c) 2012, Dave Barnwell, www.freshsauce.co.uk, github.com/freshsauce/Model
+*  All rights reserved.
+*
+*  Redistribution and use in source and binary forms, with or without
+*  modification, are permitted provided that the following conditions are met:
+*
+*  * Redistributions of source code must retain the above copyright notice, this
+*    list of conditions and the following disclaimer.
+*
+*  * Redistributions in binary form must reproduce the above copyright notice,
+*    this list of conditions and the following disclaimer in the documentation
+*    and/or other materials provided with the distribution.
+*
+*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+*  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+*  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+*  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+*  FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+*  DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+*  SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+*  OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+*  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*
+*    In your bootstrap
+*    db\Model::connectDb('mysql:dbname=testdbname;host=127.0.0.1','testuser','testpassword');
+*
+*    Extend the model and your set to go
+*    class Category extends db\Model {
+*      static protected $_tableName = 'categories';   // database table name
+*      //static protected $_primary_column_name = 'id'; // define this if your primary key column name is not id
+*
+*      // add other methods appropriate for your class
+*
+*    }
+*    $category = Category::getById(1);
+*
+*
+*
+*
+*   BU CLASS İHTİYAÇLAR DOĞRULTUSUNDA DEĞİŞTİRİLMİŞTİR
+*
+*
+*
+*/
+//namespace db;
+
+class Model
+{
+
+  // Class configuration
+
+  public static $_db;  // all models inherit this db connection
+                       // but can overide in a sub-class by calling subClass::connectDB(...) sub class must also redeclare public static $_db;
+
+  protected static $_stmt = array(); // prepared statements cache
+
+  protected static $_identifier_quote_character = null;  // character used to quote table & columns names
+  private static $_tableColumns = array();             // columns in database table populated dynamically
+  // objects public members are created for each table columns dynamically
+
+
+  // ** OVERIDE THE FOLLOWING as appropriate in your sub-class
+  protected static $_primary_column_name = 'id'; // primary key column
+  protected static $_tableName = null;           // database table name
+
+  function __construct(array $data = array()) {
+    static::getFieldnames();  // only called once first time an object is created
+    if (is_array($data)) {
+      $this->hydrate($data);
+    }
+  }
+
+  /**
+  *   getTable
+  * Mevcut tabloların hepsini alır
+  * @return array(String)
+  * @author Faruk Can
+  */
+  public static function getTables(){
+      $alltables = static::$_db->query("show tables",PDO::FETCH_NUM);
+      $return  = array();
+      while($result=$alltables->fetch()){
+        array_push($return, $result[0]);
+      }
+      return $return;
+  }
+
+  /**
+   * set the db connection for this and all sub-classes to use
+   * if a sub class overrides $_db it can have it's own db connection if required
+   * params are as new PDO(...)
+   * set PDO to throw exceptions on error
+   *
+   * @param string $dsn
+   * @param string $username
+   * @param string $password
+   * @param string $driverOptions
+   * @return void
+   */
+  public static function kullan(/*$dsn, $username, $password, $driverOptions = array()*/) {
+
+    $dsn = '';
+  
+    if ($GLOBALS['__rotaAyar']['model']['type'] == 'mysql' || $GLOBALS['__rotaAyar']['model']['type'] == '' || $GLOBALS['__rotaAyar']['model']['type'] == 'pgsql') {
+    
+      $dsn = $GLOBALS['__rotaAyar']['model']['type'] . ':host=' . $GLOBALS['__rotaAyar']['model']['host'] . ';dbname=' . $GLOBALS['__rotaAyar']['model']['dbname'];
+      
+    } elseif ($GLOBALS['__rotaAyar']['model']['type'] == 'sqlite') {
+      
+      $dsn = 'sqlite:' . $GLOBALS['__rotaAyar']['model']['dbname'] . ($GLOBALS['__rotaAyar']['model']['dbname'] == ':memory:' ? '' : '.sqlite');
+        
+    } elseif($GLOBALS['__rotaAyar']['model']['type'] == 'oracle') {
+      
+      $dsn = 'oci:dbname=' . $GLOBALS['__rotaAyar']['model']['host'] . '/' . $GLOBALS['__rotaAyar']['model']['dbname'];
+      
+    }
+
+    static::$_db = new PDO($dsn,$GLOBALS['__rotaAyar']['model']['user'],$GLOBALS['__rotaAyar']['model']['pass']);
+    static::$_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Set Errorhandling to Exception
+
+    static::$_db>exec("SET NAMES '".$GLOBALS['__rotaAyar']['model']['charset']."'");
+    static::$_db->exec("SET CHARACTER SET '".$GLOBALS['__rotaAyar']['model']['charset']."'");
+    static::$_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
+    static::_setup_identifier_quote_character();
+  }
+
+  /**
+  * Detect and initialise the character used to quote identifiers
+  * (table names, column names etc).
+  *
+  * @return void
+  */
+  public static function _setup_identifier_quote_character() {
+    if (is_null(static::$_identifier_quote_character)) {
+      static::$_identifier_quote_character = static::_detect_identifier_quote_character();
+    }
+  }
+
+  /**
+  * Return the correct character used to quote identifiers (table
+  * names, column names etc) by looking at the driver being used by PDO.
+  *
+  * @return string
+  */
+  protected static function _detect_identifier_quote_character() {
+    switch(static::getDriverName()) {
+      case 'pgsql':
+      case 'sqlsrv':
+      case 'dblib':
+      case 'mssql':
+      case 'sybase':
+          return '"';
+      case 'mysql':
+      case 'sqlite':
+      case 'sqlite2':
+      default:
+          return '`';
+    }
+  }
+  
+  /**
+   * return the driver name for the current database connection
+   *
+   * @return string (driver name as returned by PDO)
+   */
+  protected static function getDriverName() {
+    if (!static::$_db) {
+      throw new Exception('No database connection setup');
+    }
+    return static::$_db->getAttribute(PDO::ATTR_DRIVER_NAME);
+  }
+
+  /**
+  * Quote a string that is used as an identifier
+  * (table names, column names etc). This method can
+  * also deal with dot-separated identifiers eg table.column
+  *
+  * @param string $identifier
+  * @return string
+  */
+  protected static function _quote_identifier($identifier) {
+    $class = get_called_class();
+    $parts = explode('.', $identifier);
+    $parts = array_map(array($class, '_quote_identifier_part'), $parts);
+    return join('.', $parts);
+  }
+
+
+ /**
+  * This method performs the actual quoting of a single
+  * part of an identifier, using the identifier quote
+  * character specified in the config (or autodetected).
+  *
+  * @param string $part
+  * @return string
+  */
+  protected static function _quote_identifier_part($part) {
+    if ($part === '*') {
+      return $part;
+    }
+    return static::$_identifier_quote_character . $part . static::$_identifier_quote_character;
+  }
+
+  /**
+   * Get and cache on first call the column names assocaited with the current table
+   *
+   * @return array of column names for the current table
+   */
+  protected static function getFieldnames() {
+    $class = get_called_class();
+    if (!isset(self::$_tableColumns[$class])) {
+      $st = static::execute('DESCRIBE ' . static::_quote_identifier(static::$_tableName));
+      self::$_tableColumns[$class] = $st->fetchAll(PDO::FETCH_COLUMN);
+    }
+    return self::$_tableColumns[$class];
+  }
+
+  /**
+   * Given an associative array of key value pairs
+   * set the corresponding member value if associated with a table column
+   * ignore keys which dont match a table column name
+   *
+   * @param associative array $data
+   * @return void
+   */
+  public function hydrate($data) {
+    foreach(static::getFieldnames() as $fieldname) {
+      if (isset($data[$fieldname])) {
+        $this->$fieldname = $data[$fieldname];
+      } else if (!isset($this->$fieldname)) { // PDO pre populates fields before calling the constructor, so dont null unless not set
+        $this->$fieldname = null;
+      }
+    }
+  }
+  
+  /**
+   * set all members to null that are associated with table columns
+   *
+   * @return void
+   */
+  public function clear() {
+    foreach(static::getFieldnames() as $fieldname) {
+      $this->$fieldname = null;
+    }
+  }
+
+  public function __sleep() {
+    return static::getFieldnames();
+  }
+
+  public function toArray() {
+    $a = array();
+    foreach(static::getFieldnames() as $fieldname) {
+      $a[$fieldname] = $this->$fieldname;
+    }
+    return $a;
+  }
+  
+  /**
+   * Get the record with the matching primary key
+   *
+   * @param string $id
+   * @return self::Object
+   */
+  static public function getById($id) {
+    return static::fetchOneWhere(static::_quote_identifier(static::$_primary_column_name).' = ?',array($id));
+  }
+  
+  /**
+   * Get the first record in the table
+   *
+   * @return self::Object
+   */
+  static public function first() {
+    return static::fetchOneWhere('1=1 ORDER BY '.static::_quote_identifier(static::$_primary_column_name).' ASC');
+  }
+  
+  /**
+   * Get the last record in the table
+   *
+   * @return self::Object
+   */
+  static public function last() {
+    return static::fetchOneWhere('1=1 ORDER BY '.static::_quote_identifier(static::$_primary_column_name).' DESC');
+  }
+  
+  /**
+   * Find records with the matching primary key
+   *
+   * @param string $id
+   * @return array of objects for matching records
+   */
+  static public function find($id) {
+    $find_by_method = 'find_by_'.(static::$_primary_column_name);
+    static::$find_by_method($id);
+  }
+
+  /**
+   * handles calls to non-existant static methods, used to implement dynamic finder and counters ie.
+   *  find_by_name('tom')
+   *  find_by_title('a great book')
+   *  count_by_name('tom')
+   *  count_by_title('a great book')
+   *
+   * @param string $name
+   * @param string $arguments
+   * @return same as ::fetchAllWhere() or ::countAllWhere()
+   */
+  static public function __callStatic($name, $arguments) {
+    // Note: value of $name is case sensitive.
+    if (preg_match('/^find_by_/',$name) == 1) {
+      // it's a find_by_{fieldname} dynamic method
+      $fieldname = substr($name,8); // remove find by
+      $match = $arguments[0];
+      if (is_array($match)) {
+        return static::fetchAllWhere(static::_quote_identifier($fieldname). ' IN ('.static::createInClausePlaceholders($match).')', $match);
+      } else {
+        return static::fetchAllWhere(static::_quote_identifier($fieldname). ' = ?', array($match));
+      }
+    } else if (preg_match('/^findOne_by_/',$name) == 1) {
+      // it's a findOne_by_{fieldname} dynamic method
+      $fieldname = substr($name,11); // remove findOne_by_
+      $match = $arguments[0];
+      if (is_array($match)) {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' IN ('.static::createInClausePlaceholders($match).')', $match);
+      } else {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' = ?', array($match));
+      }
+    } else if (preg_match('/^first_by_/',$name) == 1) {
+      // it's a first_by_{fieldname} dynamic method
+      $fieldname = substr($name,9); // remove first_by_
+      $match = $arguments[0];
+      if (is_array($match)) {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' IN ('.static::createInClausePlaceholders($match).') ORDER BY ' . static::_quote_identifier($fieldname). ' ASC', $match);
+      } else {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' = ? ORDER BY ' . static::_quote_identifier($fieldname). ' ASC', array($match));
+      }
+    } else if (preg_match('/^last_by_/',$name) == 1) {
+      // it's a last_by_{fieldname} dynamic method
+      $fieldname = substr($name,8); // remove last_by_
+      $match = $arguments[0];
+      if (is_array($match)) {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' IN ('.static::createInClausePlaceholders($match).') ORDER BY ' . static::_quote_identifier($fieldname). ' DESC', $match);
+      } else {
+        return static::fetchOneWhere(static::_quote_identifier($fieldname). ' = ? ORDER BY ' . static::_quote_identifier($fieldname). ' DESC', array($match));
+      }
+    } else if (preg_match('/^count_by_/',$name) == 1) {
+      // it's a count_by_{fieldname} dynamic method
+      $fieldname = substr($name,9); // remove find by
+      $match = $arguments[0];
+      if (is_array($match)) {
+        return static::countAllWhere(static::_quote_identifier($fieldname). ' IN ('.static::createInClausePlaceholders($match).')', $match);
+      } else {
+        return static::countAllWhere(static::_quote_identifier($fieldname). ' = ?', array($match));
+      }
+    }
+    throw new \Exception(__CLASS__.' not such static method['.$name.']');
+  }
+
+  /**
+   * for a given array of params to be passed to an IN clause return a string placeholder
+   *
+   * @param array $params
+   * @return string
+   */
+  static public function createInClausePlaceholders($params) {
+    return implode(',', array_fill(0, count($params), '?'));  // ie. returns ? [, ?]...
+  }
+  
+  /**
+   * returns number of rows in the table
+   *
+   * @return int
+   */
+  static public function count() {
+    $st = static::execute('SELECT COUNT(*) FROM '.static::_quote_identifier(static::$_tableName));
+    return $st->fetchColumn();
+  }
+
+  /**
+   * run a SELECT count(*) FROM WHERE ...
+   * returns an integer count of matching rows
+   *
+   * @param string $SQLfragment conditions, grouping to apply (to right of WHERE keyword)
+   * @param array $params optional params to be escaped and injected into the SQL query (standrd PDO syntax)
+   * @return integer count of rows matching conditions
+   */
+  static public function countAllWhere($SQLfragment='',$params = array()) {
+    if ($SQLfragment) {
+      $SQLfragment = ' WHERE '.$SQLfragment;
+    }
+    $st = static::execute('SELECT COUNT(*) FROM '.static::_quote_identifier(static::$_tableName).$SQLfragment,$params);
+    return $st->fetchColumn();
+  }
+
+  /**
+   * run a SELECT * FROM WHERE ...
+   * returns an array of objects of the sub-class
+   *
+   * @param string $SQLfragment conditions, sorting, grouping and limit to apply (to right of WHERE keywords)
+   * @param array $params optional params to be escaped and injected into the SQL query (standrd PDO syntax)
+   * @return array of objects of calling class
+   */
+  static public function fetchAllWhere($SQLfragment='',$params = array()) {
+    $class = get_called_class();
+    if ($SQLfragment) {
+      $SQLfragment = ' WHERE '.$SQLfragment;
+    }
+    $st = static::execute('SELECT * FROM '.static::_quote_identifier(static::$_tableName).$SQLfragment,$params);
+    // $st->debugDumpParams();
+    $st->setFetchMode(PDO::FETCH_CLASS, $class);
+    return $st->fetchAll();
+  }
+  
+  /**
+   * run a SELECT * FROM WHERE ... LIMIT 1
+   * returns an object of the sub-class
+   *
+   * @param string $SQLfragment conditions, sorting, grouping and limit to apply (to right of WHERE keywords)
+   * @param array $params optional params to be escaped and injected into the SQL query (standrd PDO syntax)
+   * @return an object of calling class
+   */
+  static public function fetchOneWhere($SQLfragment='',$params = array()) {
+    $class = get_called_class();
+    if ($SQLfragment) {
+      $SQLfragment = ' WHERE '.$SQLfragment;
+    }
+    $st = static::execute('SELECT * FROM '.static::_quote_identifier(static::$_tableName).$SQLfragment.' LIMIT 1',$params);
+    $st->setFetchMode(PDO::FETCH_CLASS, $class);
+    return $st->fetch();
+  }
+  
+  /**
+   * Delete a record by its primary key
+   *
+   * @return boolean indicating success
+   */
+  static public function deleteById($id) {
+    $st = static::execute(
+      'DELETE FROM '.static::_quote_identifier(static::$_tableName).' WHERE '.static::_quote_identifier(static::$_primary_column_name).' = ? LIMIT 1',
+      array($id)
+    );
+    return ($st->rowCount() == 1);
+  }
+  
+  /**
+   * Delete the current record
+   *
+   * @return boolean indicating success
+   */
+  public function delete() {
+    return self::deleteById($this->{static::$_primary_column_name});
+  }
+
+  /**
+   * Delete records based on an SQL conditions
+   *
+   * @param string $where SQL fragment of conditions
+   * @param array $params optional params to be escaped and injected into the SQL query (standrd PDO syntax)
+   * @return PDO statement handle
+   */
+  static public function deleteAllWhere($where,$params = array()) {
+    $st = static::execute(
+      'DELETE FROM '.static::_quote_identifier(static::$_tableName).' WHERE '.$where,
+      $params
+    );
+    return $st;
+  }
+
+  /**
+   * do any validation in this function called before update and insert
+   * should throw errors on validation failure.
+   *
+   * @return boolean true or throws exception on error
+   */
+  static public function validate() {
+    return true;
+  }
+  
+  /**
+   * insert a row into the database table, and update the primary key field with the one generated on insert
+   *
+   * @param boolean $autoTimestamp true by default will set updated_at & created_at fields if present
+   * @param string $allowSetPrimaryKey, if true include primary key field in insert (ie. you want to set it yourself)
+   * @return boolean indicating success
+   */
+  public function insert($autoTimestamp = true,$allowSetPrimaryKey = false) {
+    $pk = static::$_primary_column_name;
+    $timeStr = gmdate( 'Y-m-d H:i:s');
+    if ($autoTimestamp && in_array('created_at',static::getFieldnames())) {
+      $this->created_at = $timeStr;
+    }
+    if ($autoTimestamp && in_array('updated_at',static::getFieldnames())) {
+      $this->updated_at = $timeStr;
+    }
+    $this->validate();
+    if ($allowSetPrimaryKey !== true) {
+      $this->$pk = null; // ensure id is null
+    }
+    $query = 'INSERT INTO '.static::_quote_identifier(static::$_tableName).' SET '.$this->setString(!$allowSetPrimaryKey);
+    $st = static::execute($query);
+    if ($st->rowCount() == 1) {
+      $this->{static::$_primary_column_name} = static::$_db->lastInsertId();
+    }
+    return ($st->rowCount() == 1);
+  }
+
+   /**
+    * update the current record
+    *
+    * @param boolean $autoTimestamp true by default will set updated_at field if present
+    * @return boolean indicating success
+    */
+  public function update($autoTimestamp = true) {
+    if ($autoTimestamp && in_array('updated_at',static::getFieldnames())) {
+      $this->updated_at = gmdate( 'Y-m-d H:i:s');
+    }
+    $this->validate();
+    $query = 'UPDATE '.static::_quote_identifier(static::$_tableName).' SET '.$this->setString().' WHERE '.static::_quote_identifier(static::$_primary_column_name).' = ? LIMIT 1';
+    $st = static::execute(
+      $query,
+      array(
+        $this->{static::$_primary_column_name}
+      )
+    );
+    return ($st->rowCount() == 1);
+  }
+
+  /**
+   * execute
+   * connivence function for setting preparing and running a database query
+   * which also uses the statement cache
+   *
+   * @param string $query database statement with parameter place holders as PDO driver
+   * @param array $params array of parameters to replace the placeholders in the statement
+   * @return PDO statement handle
+   */
+  public static function execute($query,$params = array()) {
+    $st = static::_prepare($query);
+    $st->execute($params);
+    return $st;
+  }
+
+  /**
+   * prepare an SQL query via PDO
+   *
+   * @param string $query
+   * @return a PDO prepared statement
+   */
+  private static function _prepare($query) {
+    if (!isset(static::$_stmt[$query])) {
+      // cache prepared query if not seen before
+      static::$_stmt[$query] = static::$_db->prepare($query);
+    }
+    return static::$_stmt[$query];  // return cache copy
+  }
+
+  /**
+   * call update if primary key field is present, else call insert
+   *
+   * @return boolean indicating success
+   */
+  public function save() {
+    if ($this->{static::$_primary_column_name}) {
+      return $this->update();
+    } else {
+      return $this->insert();
+    }
+  }
+  
+  // save in aynısı
+  public function kaydet(){
+    if ($this->{static::$_primary_column_name}) {
+      return $this->update();
+    } else {
+      return $this->insert();
+    }
+  }
+
+  /**
+   * Create an SQL fragment to be used after the SET keyword in an SQL UPDATE
+   * escaping parameters as necessary.
+   * by default the primary key is not added to the SET string, but passing $ignorePrimary as false will add it
+   *
+   * @param boolean $ignorePrimary
+   * @return string
+   */
+  protected function setString($ignorePrimary = true) {
+    // escapes and builds mysql SET string returning false, empty string or `field` = 'val'[, `field` = 'val']...
+    $sqlFragment = false;
+    $fragments = array();
+    foreach(static::getFieldnames() as $field) {
+      if ($ignorePrimary && $field == static::$_primary_column_name) continue;
+      if (isset($this->$field)) {
+        if ($this->$field === null) {
+          // if empty set to NULL
+          $fragments[] = static::_quote_identifier($field).' = NULL';
+        } else {
+          // Just set value normally as not empty string with NULL allowed
+          $fragments[] = static::_quote_identifier($field).' = '.static::$_db->quote($this->$field);
+        }
+      }
+    }
+    $sqlFragment = implode(", ",$fragments);
+    return $sqlFragment;
+  }
+  
+  /**
+   * convert a date string or timestamp into a string suitable for assigning to a SQl datetime or timestamp field
+   *
+   * @param string|int $dt a date string or a unix timestamp
+   * @return string
+   */
+  static function datetimeToMysqldatetime($dt) {
+    $dt = (is_string($dt)) ? strtotime($dt) : $dt;
+    return date('Y-m-d H:i:s',$dt);
+  }
+}
+
+?>
+?><?php
+/*
+|--------------------------------------------------------------------------
+| h
+|--------------------------------------------------------------------------
+| HTML kodlarını kolay üretmeye yarar
+| 
+*/
+
+class H {
+    // bunu düzenle
+    /*$tablo = array(
+        array(5,6,8,9,6),
+        array(5,6,8,9,6),
+        array(5,6,8,9,6),
+        array(5,6,8,9,6)
+    );
+    $TABLO = arr2table($tablo);*/
+    static function arr2table($arr,$att=false){
+        $html = "";
+            foreach($arr as $sat){
+                $html.="<tr>";
+                foreach($sat as $sut){
+                    $html.="<td>$sut</td>";
+                }
+                $html.="<tr>";
+            }
+        return xml("table",$html,$att);
+    }
+
+    static function xml($tag,$data=false,$att=false)
+    {
+        // <tag atts> data </tag>
+
+        $at = "";
+        if($att){
+            foreach ($att as $key => $value) {
+                $at.=" ".$key.'="'.$value.'"';
+            }
+        }
+
+        if($data) return "<$tag$at>$data</$tag>";
+        return "<$tag$att/>";
+    }
+
+    static function FormOpen($att=false,$csrf=true)
+    {
+        $at = "";
+        if($att){
+            foreach ($att as $key => $value) {
+                $at.=" ".$key.'="'.$value.'"';
+            }
+        }
+        if($csrf)
+          return "<FORM$at>";
+        else
+          return "<FORM$at>";
+    }
+
+    static function FormClose()
+    {
+        return "</FORM>";
+    }
+
+    static function csrf(){
+        
+    }
+}
+?><?php
+	/*
+	|--------------------------------------------------------------------------
+	| Girdi
+	|--------------------------------------------------------------------------
+	|	GET/POST isteklerini ve URL üzerindeki istekleri düzenler
+	| 
+	*/
+
+class Girdi {
+	static function varsa($girdiAd)
+	{
+		if(isset($_GET[$girdiAd]) || isset($_POST[$girdiAd])) return true;
+		return false;
+	}
+	static function al($girdiAd)
+	{
+		if(Girdi::metod($girdiAd)) return $_POST[$girdiAd];
+		else return $_GET[$girdiAd];
+	}
+	static function metod($girdiAd){
+		if(isset($_POST[$girdiAd])) return true;
+		return false;
+	}
+	static function gerekliGET($arr)
+	{
+		$GLOBALS['__gerekliGET'] = $arr;
+		foreach ($arr as $girdi) {
+			if(!isset($_GET[$girdi])){
+				require_once 'sistem/fonksiyon/400.php';
+				break;
+			}
+		}
+	}
+	static function gerekliPOST($arr)
+	{
+		$GLOBALS['__gerekliPOST'] = $arr;
+		foreach ($arr as $girdi) {
+			if(!isset($_POST[$girdi])){
+				require_once 'sistem/fonksiyon/400.php';
+				break;
+			}
+		}
+	}
+
+
+	static function hepsiniAl()
+	{
+		// GET veya POST ile alınanları GLOBAL değişken yapar
+		if(isset($GLOBALS['__gerekliGET']))
+			foreach ($GLOBALS['__gerekliGET'] as $girdi) {
+				$GLOBALS[$girdi] = $_GET[$girdi];
+			}
+		if(isset($GLOBALS['__gerekliPOST']))
+			foreach ($GLOBALS['__gerekliPOST'] as $girdi) {
+				$GLOBALS[$girdi] = $_POST[$girdi];
+			}
+	}
+
+
+}
+
+?><?php H::csrf(); ?><htm kodları>
+
+<?php
+
+$ali = array('ahmet','mehmet','süleyman');
+
+echo H::xml("a",'Tıkla',array('href'=>''));
+?><!doctype html>
+<!  بِسْــــــــــــــــــــــمِ اﷲِارَّحْمَنِ ارَّحِيم >
+<html lang="tr">
+<head>
+	<meta charset="UTF-8"/>
+	<title>
+	Alt Sayfadan Gelen Başlığımız
+</title>
+</head>
+
+d
+<h1>
+	menüler buraya gelir
+</h1>
+
+<br>
+<h2> Burada ornek sayfasınını dahil ediyoruz</h2>
+<br>
+<?php ?>
+
+SAYFAlarda mantıksal ve döngüsel kullanımlar <br>
+
+<?php if(false){ ?>
+	if-oldu lan !
+<?php }elseif(true){ ?>
+	elseif-habi oldu
+<?php } ?>
+
+<br>
+
+
+
+
+<?php if(false){ ?>
+olmadı
+<?php }else{ ?>
+<b>else-oldu!!!</b>
+<?php } ?>
+
+<br>
+
+<?php for($i=0;$i<5;$i++){ ?>
+	<?php echo  ($i+1) ; ?> . şey
+<?php } ?>
+
+<br><br>
+
+
+bir arrayi foreach ile bastıralım:
+
+<?php foreach($ali as $a){ ?>
+	<?php echo  var_dump($a) ; ?>
+<?php } ?>
+
+<br>
+
+Sayfa2 : <?php echo  $sayfa2 ; ?>
+
+3 süslü parantez sayfaya bastırılmaz -|<?php  $i = 6;$b=0;$c=50; ?>|- <br>
+
+
+
+<?php echo  $i ; ?> ' den geri say :
+
+
+<?php while($i--){ ?>
+	<?php echo  $i ; ?> -
+<?php } ?>
+
+
+C değeri : <?php echo  $c; ; ?>
+
+
+<?php ?><i> ornek 2 sayfası dahil edildi <?php echo  $b = 'cem' ; ?> </i><?php ?>
+
+<?php ?>
+<br>
+<br>dd
+<br> url den gelen değişken<br>
+
+<b><i><?php echo  isset($sayfa) ? $sayfa : 'birşeygelmedi'; ?></b></i>
+
+<h3>
+	alt menüler gelir
+</h3>
+
+
+
+</html><?php
+Girdi::hepsiniAl();
+//echo 'id : "'.$id .'" değeri alındı';
+?><i> ornek 2 sayfası dahil edildi <?php echo  $b = 'cem' ; ?> </i><?php
+
+Model::kullan();
+
+
+class kelimeler extends Model{
+	static protected $_tableName = 'kelimeler';
+}
+ $category = kelimeler::getById(1002); // read category into a new object
+var_dump($category);
+
+
+
+var_dump(Model::getTables());
+//Model::yap();
+//Girdi::x;
+//var_dump(Vt::pdox()->select()->from('kelimeler') );
+echo isset($ahmet) ? $ahmet : '<br>naber';
+?>
+ss
+gene html
+s
+<?php
+	//php kodları
+?>
