@@ -4,8 +4,13 @@ class Ayar {
 	static function al($api="ayar",$ayar=false)
 	{
 		if($ayar===false)
-			return $GLOBALS['__rotaAyar'][$api];
+			return '$GLOBALS[\'__rotaAyar\'][\''+$api+'\']';
 		else
-			return $GLOBALS['__rotaAyar'][$api][$ayar];
+			return '$GLOBALS[\'__rotaAyar\'][\''+$api+'\'][\''+$ayar+'\']';
 	}
+
+    function cache()
+    {
+        return array('al');
+    }
 }

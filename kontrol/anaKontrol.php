@@ -2,7 +2,8 @@
 //echo $sayfa . "<br>" . $sayfa2;
 echo "hey";
 
-Ayar::al();
+echo Ayar::al();
+
 
 
 $vt = Vt::pdox();

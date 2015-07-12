@@ -703,21 +703,12 @@ class H {
         
     }
 }
-?><?php
-
-class Ayar {
-	static function al($api="ayar",$ayar=false)
-	{
-		if($ayar===false)
-			return $GLOBALS['__rotaAyar'][$api];
-		else
-			return $GLOBALS['__rotaAyar'][$api][$ayar];
-	}
-}?><?php H::csrf(); ?><?php
+?><?php H::csrf(); ?><?php
 //echo $sayfa . "<br>" . $sayfa2;
 echo "hey";
 
-Ayar::al();
+echo Ayar::al();
+
 
 
 $vt = Vt::pdox();

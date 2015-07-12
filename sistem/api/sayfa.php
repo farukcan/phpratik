@@ -79,7 +79,7 @@ class Sayfa {
         return "?>".Sayfa::doldur(Sayfa::oku($sayfa),$sayfa)."<?php";
     }
 
-    function cache()
+    static function cache()
     {
         //cache edilebilir fonksiyonlarımız
         return array('yap');

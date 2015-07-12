@@ -1,10 +1,10 @@
-{
-	"ad" : "Ayar",
-	"lisans" : "Kamu",
-	"not" : "",
-	"version": 1.00,
-	"gerekli_apiler" : [],
-	"ayar":true,
-	"cache":false,
-	"cacheonly":false
-}
+			{
+				"ad" : "Ayar",
+				"lisans" : "Kamu",
+				"not" : "",
+				"version": 1.00,
+				"gerekli_apiler" : [],
+				"ayar":true,
+				"cache":true,
+				"cacheonly":true
+			}
