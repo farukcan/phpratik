@@ -3,7 +3,7 @@ Basit ve pratik türk PHP Frameworku
 
 MVC(ModelViewControl - ModelSayfaKontrol) yapısına sahip, kendi kodlarını değiştiren ve optimize eden, lazyload, basit ve pratik framework.
 
-*Kısacası şu işlere yarar*
+**Kısacası şu işlere yarar**
 
 Az kod ile çok fonksiyonu yerine getirme.
 
