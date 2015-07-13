@@ -1,4 +1,8 @@
 <?php
+
+	$isCaching = true;
+	$__sayfa=""; // mevcut işlenen sayfanın kodudur. apilerin cache fonksiyonları için
+
 	/*
 	|--------------------------------------------------------------------------
 	| APiLER HAKKINDAKI BİLGİLERİN YÜKLENMESİ
@@ -90,7 +94,7 @@
 			// Burada kontrollerin, class kullanımına bakılarak , eklenmesi gereken classlar belirlenir
 			$apicache=true; // AMAÇ :: her bir classın kontrol koduna müdahele bulunması, yeni classların işe dahil olması durumunda en başta işlemlere devam edilmesi
 			
-			$__rotaAyar = array();
+			$__phpratikAyar = array();
 
 			while($apicache){ // apiler cache üretiminde bulunursa
 				$apicache=false;
@@ -160,10 +164,10 @@
 				// buradan sonra api cacheleri çağrılırmak için yükle ve çağır teker teker
 				foreach (array_keys($addapi) as $s) {
 					if($api[$s]->ayar) //ayar dosyası varsa ekle
-						$__rotaAyar[$s] = $app->loadAyar($s); // PERFORMSN AÇISINDAN SIKINTILI
+						$__phpratikAyar[$s] = $app->loadAyar($s); // PERFORMSN AÇISINDAN SIKINTILI
 					if($api[$s]->cache){ // yüklenecek apinin cachesi varsa
 						require_once '/sistem/api/'.$s.'.php'; // classını yükle
-						$return=$app->cache($api[$s],$sayfa); // app, cache işleme fonksiyonuna gönder
+						$return=cache($api[$s],$sayfa); // app, cache işleme fonksiyonuna gönder
 						$sayfa = $return[0]; // sayfanın yenideğeri dizin ilk değeri
 						if($return[1]) // bir değişiklik yapıldı mı ?
 							$apicache=true; 
@@ -182,7 +186,7 @@
 			//var_dump($addapi);
 			// geri birleştirme ?
 
-			// Classları ve ayarlarını sayfa başına ekle __rotaAyar
+			// Classları ve ayarlarını sayfa başına ekle __phpratikAyar
 
 
 			
@@ -192,7 +196,7 @@
 					$sayfa=okuDosya('sistem/api/'.$apiAd.'.php')."?>".$sayfa;
 			}
 
-			$sayfa= '<?php $__rotaAyar='.var_export($__rotaAyar,true).';?>'.$sayfa;
+			$sayfa= '<?php $__phpratikAyar='.var_export($__phpratikAyar,true).';?>'.$sayfa;
 
 			
 
@@ -232,3 +236,55 @@
 
 
 		$app = new App;
+
+
+
+	function cache($api,$sayfa)
+	{
+		global $__sayfa;
+
+		$__sayfa = $sayfa;
+
+		$cached=false;
+		$called_class = new $api->class(); // apinin classını çağır
+		// APInın classını kendine dahil et
+		// apinin cache fonksiyonlarının isimlerini al
+		$class_name = $api->class;
+
+		// her cache fonksiyonu için yap ;
+		foreach ($called_class->cache() as $class_function) {
+			// her fonksiyonu tek tek ara ve işle
+				// sayfada o classının fonksiyonun arayalım
+				preg_match_all("/$class_name::$class_function\((.*?)\)/", $__sayfa, $output_array);
+				// amaç x(a) ile x(b) leri ayırmak
+
+				// bulursak onları bir arraye alalım
+				$datas = array_unique($output_array[1]);
+				//var_dump($datas);
+				// o array üzerinde fonksiyonu çağırarak tek tek kod üzerinde değişiklik yapalım
+				foreach ($datas as $fundata) {
+					$__sayfa = str_replace(
+							"$class_name::$class_function($fundata)", 
+							include cached_function("$class_name::$class_function($fundata)"), $__sayfa);
+					$cached = true;
+				}
+		}
+
+		return array($__sayfa,$cached);
+	}
+
+
+function cached_function($fonksiyonSTR)
+{
+	$file = "sistem/cache/fonksiyon/".sha1($fonksiyonSTR);
+	// cache fonksiyonu çalışırken kendi için dosya oluşturur ve bu dosya include edilecek çalıştırılır.
+	
+	// daha önce oluşturulduysa
+	if(is_file($file)) return $file;
+
+	yazDosya($file,	"<?php
+	return $fonksiyonSTR ;
+");
+
+	return $file;
+}

@@ -119,32 +119,6 @@ class App
 
 
 	}
-	function cache($api,$sayfa)
-	{
-		$cached=false;
-		$called_class = new $api->class(); // apinin classını çağır
-		// APInın classını kendine dahil et
-		// apiden dönen cache fonksiyonlarını al
-		$class_name = $api->class;
-		foreach ($called_class->cache() as $class_function) {
-			// classın her fonksiyonu tek tek ara ve işle
-				// sayfada o classının fonksiyonun arayalım
-				preg_match_all("/$class_name::$class_function\([\"\'](.*?)[\"\']\);/", $sayfa, $output_array);
-				// bulursak onları bir arraye alalım
-				$datas = array_unique($output_array[1]);
-				//var_dump($datas);
-				// o array üzerinde fonksiyonu çağırarak tek tek kod üzerinde değişiklik yapalım
-				foreach ($datas as $fundata) {
-					$sayfa = str_replace(array(
-							"$class_name::$class_function('$fundata');",
-							$class_name."::".$class_function.'("'.$fundata.'");'
-						), $called_class->{$class_function}($fundata), $sayfa);
-					$cached = true;
-				}
-		}
-
-		return array($sayfa,$cached);
-	}
 
 	function loadAyar($api){
 		return require 'sistem/ayar/'.$api.'.php';

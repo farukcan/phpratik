@@ -1,4 +1,4 @@
-<?php $__rotaAyar=array (
+<?php $__phpratikAyar=array (
   'ayar' => 
   array (
     'OrnekAyar' => 'degeri',
@@ -25,7 +25,7 @@ class Vt
 	}
 
 	static function check(){
-		if(!isset($GLOBALS['_pdox'])) $GLOBALS['_pdox'] = new PDOx($GLOBALS['__rotaAyar']['vt']);	
+		if(!isset($GLOBALS['_pdox'])) $GLOBALS['_pdox'] = new PDOx($GLOBALS['__phpratikAyar']['vt']);	
 	}
 
 	static function sor()
@@ -707,7 +707,10 @@ class H {
 //echo $sayfa . "<br>" . $sayfa2;
 echo "hey";
 
-echo Ayar::al();
+var_dump($GLOBALS['__phpratikAyar']['ayar']);
+
+// güncelddds
+
 
 
 

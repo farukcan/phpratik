@@ -42,7 +42,7 @@ class Sayfa {
             }
         }
 
-        preg_match('/'.$GLOBALS['__rotaAyar']['sayfa']['ayrac'].'(.*)/',  $ad, $extend); //üst sayfanın adı
+        preg_match('/'.$GLOBALS['__phpratikAyar']['sayfa']['ayrac'].'(.*)/',  $ad, $extend); //üst sayfanın adı
         
         if(!empty($extend)){ // ext[1] ad
 
@@ -71,7 +71,7 @@ class Sayfa {
     static function oku($sayfa)
     {
 
-        return okuDosya($GLOBALS['__rotaAyar']['sayfa']['klasor'].$sayfa.'.html');
+        return okuDosya($GLOBALS['__phpratikAyar']['sayfa']['klasor'].$sayfa.'.html');
     }
 
     static function yap($sayfa) //bu cached fonksiyondur

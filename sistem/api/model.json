@@ -2,6 +2,6 @@
 	"version": 1.00,
 	"gerekli_apiler" : [],
 	"ayar":true,
-	"cache":false,
+	"cache":true,
 	"cacheonly":false
 }

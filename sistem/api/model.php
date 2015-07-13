@@ -77,6 +77,9 @@ class Model
   protected static $_tableName = null;           // database table name
 
   function __construct(array $data = array()) {
+
+    if(isset($GLOBALS["isCaching"])) return; // phpratik ile uyum için cachig aşamasında kapalı olmalı
+
     static::getFieldnames();  // only called once first time an object is created
     if (is_array($data)) {
       $this->hydrate($data);
@@ -98,6 +101,43 @@ class Model
       return $return;
   }
 
+  static function cache()
+  {
+    return array('kullan');
+  }
+
+  static function kullan()
+  {
+    global $__sayfa; // oan işlenn sayfanın kodları
+
+    static::baglan();
+    $tablolar = static::getTables();
+    $dahiledilecektablolar = array();
+    foreach ($tablolar as $tablo) {
+      // eğer model kullanıldıysa dahil et.
+      if( !is_bool(strpos($__sayfa,$tablo.'::')) || !is_bool(strpos($__sayfa,'new '.$tablo)) )
+        {
+              array_push($dahiledilecektablolar, $tablo);
+        }
+    }
+
+    $kod ="";
+    foreach ($dahiledilecektablolar as $tablo) {
+      if(is_file("sistem/cache/modeller/".$tablo.".php")){
+        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+      }else{
+        yazDosya("sistem/cache/modeller/".$tablo.".php","class $tablo extends Model{
+          static protected ".'$_tableName'." = '$tablo';
+}
+        ");
+        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+      }
+  
+    }    
+
+    return $kod."Model::baglan()";
+  }
+
   /**
    * set the db connection for this and all sub-classes to use
    * if a sub class overrides $_db it can have it's own db connection if required
@@ -110,29 +150,29 @@ class Model
    * @param string $driverOptions
    * @return void
    */
-  public static function kullan(/*$dsn, $username, $password, $driverOptions = array()*/) {
+  public static function baglan(/*$dsn, $username, $password, $driverOptions = array()*/) {
 
     $dsn = '';
   
-    if ($GLOBALS['__rotaAyar']['model']['type'] == 'mysql' || $GLOBALS['__rotaAyar']['model']['type'] == '' || $GLOBALS['__rotaAyar']['model']['type'] == 'pgsql') {
+    if ($GLOBALS['__phpratikAyar']['model']['type'] == 'mysql' || $GLOBALS['__phpratikAyar']['model']['type'] == '' || $GLOBALS['__phpratikAyar']['model']['type'] == 'pgsql') {
     
-      $dsn = $GLOBALS['__rotaAyar']['model']['type'] . ':host=' . $GLOBALS['__rotaAyar']['model']['host'] . ';dbname=' . $GLOBALS['__rotaAyar']['model']['dbname'];
+      $dsn = $GLOBALS['__phpratikAyar']['model']['type'] . ':host=' . $GLOBALS['__phpratikAyar']['model']['host'] . ';dbname=' . $GLOBALS['__phpratikAyar']['model']['dbname'];
       
-    } elseif ($GLOBALS['__rotaAyar']['model']['type'] == 'sqlite') {
+    } elseif ($GLOBALS['__phpratikAyar']['model']['type'] == 'sqlite') {
       
-      $dsn = 'sqlite:' . $GLOBALS['__rotaAyar']['model']['dbname'] . ($GLOBALS['__rotaAyar']['model']['dbname'] == ':memory:' ? '' : '.sqlite');
+      $dsn = 'sqlite:' . $GLOBALS['__phpratikAyar']['model']['dbname'] . ($GLOBALS['__phpratikAyar']['model']['dbname'] == ':memory:' ? '' : '.sqlite');
         
-    } elseif($GLOBALS['__rotaAyar']['model']['type'] == 'oracle') {
+    } elseif($GLOBALS['__phpratikAyar']['model']['type'] == 'oracle') {
       
-      $dsn = 'oci:dbname=' . $GLOBALS['__rotaAyar']['model']['host'] . '/' . $GLOBALS['__rotaAyar']['model']['dbname'];
+      $dsn = 'oci:dbname=' . $GLOBALS['__phpratikAyar']['model']['host'] . '/' . $GLOBALS['__phpratikAyar']['model']['dbname'];
       
     }
 
-    static::$_db = new PDO($dsn,$GLOBALS['__rotaAyar']['model']['user'],$GLOBALS['__rotaAyar']['model']['pass']);
+    static::$_db = new PDO($dsn,$GLOBALS['__phpratikAyar']['model']['user'],$GLOBALS['__phpratikAyar']['model']['pass']);
     static::$_db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION); // Set Errorhandling to Exception
 
-    static::$_db>exec("SET NAMES '".$GLOBALS['__rotaAyar']['model']['charset']."'");
-    static::$_db->exec("SET CHARACTER SET '".$GLOBALS['__rotaAyar']['model']['charset']."'");
+    static::$_db>exec("SET NAMES '".$GLOBALS['__phpratikAyar']['model']['charset']."'");
+    static::$_db->exec("SET CHARACTER SET '".$GLOBALS['__phpratikAyar']['model']['charset']."'");
     static::$_db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
     static::_setup_identifier_quote_character();
   }
@@ -277,6 +317,11 @@ class Model
    */
   static public function getById($id) {
     return static::fetchOneWhere(static::_quote_identifier(static::$_primary_column_name).' = ?',array($id));
+  }
+
+  static public function al($id)
+  {
+    return static::getById($id);
   }
   
   /**
@@ -424,6 +469,9 @@ class Model
     $st->setFetchMode(PDO::FETCH_CLASS, $class);
     return $st->fetchAll();
   }
+  public static function hepsiniBul($SQLfragment='',$params = array()){
+    return static::fetchAllWhere($SQLfragment,$params);
+  }
   
   /**
    * run a SELECT * FROM WHERE ... LIMIT 1
@@ -442,7 +490,11 @@ class Model
     $st->setFetchMode(PDO::FETCH_CLASS, $class);
     return $st->fetch();
   }
-  
+
+  public static function tekiniBul($SQLfragment='',$params = array()){
+    return static::fetchOneWhere($SQLfragment,$params);
+  }
+    
   /**
    * Delete a record by its primary key
    *
@@ -462,6 +514,11 @@ class Model
    * @return boolean indicating success
    */
   public function delete() {
+    return self::deleteById($this->{static::$_primary_column_name});
+  }
+
+  public function sil()
+  {
     return self::deleteById($this->{static::$_primary_column_name});
   }
 
@@ -583,11 +640,7 @@ class Model
   
   // save in aynısı
   public function kaydet(){
-    if ($this->{static::$_primary_column_name}) {
-      return $this->update();
-    } else {
-      return $this->insert();
-    }
+    return $this->save();
   }
 
   /**

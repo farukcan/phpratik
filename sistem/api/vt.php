@@ -10,7 +10,7 @@ class Vt
 	}
 
 	static function check(){
-		if(!isset($GLOBALS['_pdox'])) $GLOBALS['_pdox'] = new PDOx($GLOBALS['__rotaAyar']['vt']);	
+		if(!isset($GLOBALS['_pdox'])) $GLOBALS['_pdox'] = new PDOx($GLOBALS['__phpratikAyar']['vt']);	
 	}
 
 	static function sor()

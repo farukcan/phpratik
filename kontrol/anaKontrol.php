@@ -2,7 +2,10 @@
 //echo $sayfa . "<br>" . $sayfa2;
 echo "hey";
 
-echo Ayar::al();
+var_dump(Ayar::al());
+
+// güncelddds
+
 
 
 
