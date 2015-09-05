@@ -22,3 +22,5 @@ Dosyaların dahil(include) edilmesinde otomatiklik ve kolaylık.
 Güncellik ve güvenlilik.
 
 **Ayrıca phpratik GitHub üzerinde tutulduğu için sizde geliştirmelisine yardım edebilirsiniz.**
+
+https://github.com/farukcan/phpratik/wiki
