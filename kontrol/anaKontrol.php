@@ -11,7 +11,7 @@ var_dump(Ayar::al());
 
 $vt = Vt::pdox();
 
-$a=$vt->select()->from('kelimeler')->getAll();;
+//$a=$vt->select()->from('kelimeler')->getAll();;
 
 
 var_dump($a);

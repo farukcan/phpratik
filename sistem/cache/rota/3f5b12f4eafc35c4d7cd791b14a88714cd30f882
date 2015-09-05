@@ -6,8 +6,8 @@
   'vt' => 
   array (
     'user' => 'root',
-    'pass' => '',
-    'dbname' => 'kelime',
+    'pass' => 'faruk',
+    'dbname' => 'mysql',
     'host' => 'localhost',
     'type' => 'mysql',
     'charset' => 'utf8',
@@ -716,7 +716,7 @@ var_dump($GLOBALS['__phpratikAyar']['ayar']);
 
 $vt = Vt::pdox();
 
-$a=$vt->select()->from('kelimeler')->getAll();;
+//$a=$vt->select()->from('kelimeler')->getAll();;
 
 
 var_dump($a);

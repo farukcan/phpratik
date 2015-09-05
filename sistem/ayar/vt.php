@@ -2,8 +2,8 @@
 return array(
 
     'user'      => 'root',
-    'pass'      => '',
-    'dbname'    => 'kelime',
+    'pass'      => 'faruk',
+    'dbname'    => 'mysql',
     'host'      => 'localhost',
     'type'      => 'mysql',
     'charset'   => 'utf8',

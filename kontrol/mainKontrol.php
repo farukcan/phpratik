@@ -1,14 +1,23 @@
 <htm kodları>
 
 <?php
+
+Mcache::set("ben","sen");
+
+$d = Mcache::delete("ben");
+var_dump($d);
+
+echo "<hr>";
+
+
 Model::kullan();
 
 
 
-$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new object
+//$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new object
 //$kelime->lojik = "13";
 //$kelime->save();
-var_dump($kelime);
+//var_dump($kelime);
 
 
 

@@ -1,7 +1,7 @@
 <?php
 define('sistem_start', microtime(true));
-session_start();
-ob_start();
+
+
 	/*
 	|--------------------------------------------------------------------------
 	| index.php
@@ -219,5 +219,5 @@ function getAllFiletimes($dic,$ext,$subdic=''){
 
 
 //index.php sonu
-ob_end_flush();
+
 ?>

@@ -166,7 +166,7 @@
 					if($api[$s]->ayar) //ayar dosyası varsa ekle
 						$__phpratikAyar[$s] = $app->loadAyar($s); // PERFORMSN AÇISINDAN SIKINTILI
 					if($api[$s]->cache){ // yüklenecek apinin cachesi varsa
-						require_once '/sistem/api/'.$s.'.php'; // classını yükle
+						require_once 'sistem/api/'.$s.'.php'; // classını yükle
 						$return=cache($api[$s],$sayfa); // app, cache işleme fonksiyonuna gönder
 						$sayfa = $return[0]; // sayfanın yenideğeri dizin ilk değeri
 						if($return[1]) // bir değişiklik yapıldı mı ?

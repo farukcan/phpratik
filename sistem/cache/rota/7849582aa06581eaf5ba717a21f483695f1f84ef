@@ -1,9 +1,14 @@
 <?php $__phpratikAyar=array (
+  'mcache' => 
+  array (
+    'host' => 'localhost',
+    'port' => 11211,
+  ),
   'model' => 
   array (
     'user' => 'root',
-    'pass' => '',
-    'dbname' => 'kelime',
+    'pass' => 'faruk',
+    'dbname' => 'mysql',
     'host' => 'localhost',
     'type' => 'mysql',
     'charset' => 'utf8',
@@ -17,8 +22,8 @@
   'vt' => 
   array (
     'user' => 'root',
-    'pass' => '',
-    'dbname' => 'kelime',
+    'pass' => 'faruk',
+    'dbname' => 'mysql',
     'host' => 'localhost',
     'type' => 'mysql',
     'charset' => 'utf8',
@@ -1333,6 +1338,43 @@ class Model
 
 ?>
 ?><?php
+
+	class Mcache{
+		static function check()
+		{
+			if(isset($GLOBALS["__mcache"]))
+				return true;
+			else
+			{
+				$GLOBALS["__mcache"]  = new Memcache;
+				$GLOBALS["__mcache"]->connect($GLOBALS['__phpratikAyar']['mcache']['host'], $GLOBALS['__phpratikAyar']['mcache']['port']) or die ("MemCached servera baglanilamiyor!");
+				return false;
+			}
+
+		}
+
+		static function getClass()
+		{
+			Mcache::check();
+			return $GLOBALS["__mcache"];
+		}
+
+		static function set($a,$b,$c=null,$d=null){
+			Mcache::check();
+			return $GLOBALS["__mcache"]->set($a,$b,$c,$d);
+		}
+
+		static function get($a,$b=null){
+			Mcache::check();
+			return $GLOBALS["__mcache"]->get($a,$b);
+		}
+
+		static function delete($a,$b=null){
+			Mcache::check();	
+			return $GLOBALS["__mcache"]->delete($a,$b);
+		}
+
+	}?><?php
 /*
 |--------------------------------------------------------------------------
 | h
@@ -1465,17 +1507,23 @@ class Girdi {
 ?><?php H::csrf(); ?><htm kodları>
 
 <?php
-class kelimeler extends Model{
-          static protected $_tableName = 'kelimeler';
-}
-        Model::baglan();
+
+Mcache::set("ben","sen");
+
+$d = Mcache::delete("ben");
+var_dump($d);
+
+echo "<hr>";
+
+
+Model::baglan();
 
 
 
-$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new object
+//$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new object
 //$kelime->lojik = "13";
 //$kelime->save();
-var_dump($kelime);
+//var_dump($kelime);
 
 
 
