@@ -1,0 +1,10 @@
+			{
+				"ad" : "hesap",
+				"lisans" : "Kamu",
+				"not" : "",
+				"version": 1.00,
+				"gerekli_apiler" : ["model","oturum"],
+				"ayar":true,
+				"cache":true,
+				"cacheonly":false
+			}

@@ -3,7 +3,7 @@
 	class Oturum {
 		
 		static private $kaydedici; // en son sayfada iş bitince kaydeder
-
+		static public $ip;
 
 		// Oturum verilerin durumu kontrol eder, ve oturum sistemini aktifleştiri
 		static function check() {
@@ -13,6 +13,8 @@
 			// bu class destruct olurken; eski oturum dosyası silinip yenisine yazılır
 
 			self::$kaydedici = new OturumKaydedici();
+
+			self::$ip = self::ip();
 
 			if(isset($_COOKIE['phpratik'])){
 
@@ -25,6 +27,7 @@
 
 
 		}
+		static function kullan() { return self::check(); }
 
 		// Oturum oluşturur. Her seferinde , eski veriler varsa bile yenilenmektedir.
 		static function create(){
@@ -148,7 +151,7 @@
 
 			$GLOBALS['_OTURUM'] = unserialize($load);
 
-			if($GLOBALS['_OTURUM']["ip"] != Oturum::ip()) return false;
+			if($GLOBALS['_OTURUM']["ip"] != self::$ip) return false;
 
 			return true;
 		}
@@ -159,7 +162,7 @@
 
 		static function bilgi($veri){
 			if(!isset($GLOBALS["_OTURUM"])) Oturum::check();
-			return $GLOBALS["_OTURUM"][$veri];
+			return isset($GLOBALS["_OTURUM"][$veri]) ? $GLOBALS["_OTURUM"][$veri] : false;
 		}
 		static function get($v) { return Oturum::bilgi($v); }
 		static function al($v) { return Oturum::bilgi($v); }

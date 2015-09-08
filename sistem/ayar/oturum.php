@@ -18,8 +18,8 @@ return array(
 			// önemliNOT: api/oturum.js 'dan gerekli apiler'e vt'yi ekleyin.
 
 			"tablo" => "oturum_tablosu",
-			"kodSutunu" => "kod",
-			"veriSutunu" => "veri",
+			"kodSutunu" => "kod", // varchar(45)
+			"veriSutunu" => "veri", // text
 
 
 		*/		

@@ -1,5 +1,6 @@
 <htm kodları>
 
+<script type="text/javascript" src="js/aa.js"></script>
 <?php
 
 
@@ -28,6 +29,11 @@ echo "<hr>";
 
 Model::kullan();
 
+Hesap::kullan();
+
+
+
+$a = new user();
 
 
 
