@@ -13,7 +13,7 @@ Vt::sor()->tablo('oturum')->ekle([
 ]);*/
 
 
-Vt::sorgu()->tablo('oturum')->nerede([ "kod" => "deneme"])->sil();
+//vt::sorgu()->tablo('oturum')->nerede([ "kod" => "deneme"])->sil();
 
 Oturum::set("elme","armut".uniqid());
 var_dump(Oturum::get("elme"));

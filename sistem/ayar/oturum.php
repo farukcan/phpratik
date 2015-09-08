@@ -17,7 +17,7 @@ return array(
 			// Veri Tabanı için ayarlar
 			// önemliNOT: api/oturum.js 'dan gerekli apiler'e vt'yi ekleyin.
 
-			"tablo" => "oturum",
+			"tablo" => "oturum_tablosu",
 			"kodSutunu" => "kod",
 			"veriSutunu" => "veri",
 

@@ -676,7 +676,6 @@ class PDOx {
 		// Oturum verilerin durumu kontrol eder, ve oturum sistemini aktifleştiri
 		static function check() {
 
-
 			if(isset($GLOBALS["_OTURUM"])) return $GLOBALS["phpratik_oturum_kodu"];
 
 			// bu class destruct olurken; eski oturum dosyası silinip yenisine yazılır
@@ -991,14 +990,16 @@ class Model
 
     $kod ="";
     foreach ($dahiledilecektablolar as $tablo) {
-      if(is_file("sistem/cache/modeller/".$tablo.".php")){
-        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+      if(is_file(ROOT."model/".$tablo.".php")){
+        $kod.= substr(okuDosya("model/".$tablo.".php"), 5);
       }else{
-        yazDosya("sistem/cache/modeller/".$tablo.".php","class $tablo extends Model{
+        yazDosya("model/".$tablo.".php","<?php
+class $tablo extends Model{
           static protected ".'$_tableName'." = '$tablo';
 }
         ");
-        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+        $kod.= substr(okuDosya("model/".$tablo.".php"), 5);
+
       }
   
     }    
@@ -1187,10 +1188,7 @@ class Model
     return static::fetchOneWhere(static::_quote_identifier(static::$_primary_column_name).' = ?',array($id));
   }
 
-  static public function al($id)
-  {
-    return static::getById($id);
-  }
+  static public function al($id){ return static::getById($id); }
   
   /**
    * Get the first record in the table
@@ -1719,12 +1717,11 @@ class Girdi {
 
 }
 
-?><?php H::csrf(); ?><htm kodları>
+?><?php  ?><htm kodları>
 
 <?php
 
 
-Model::baglan();
 
 //var_dump(Vt::sorgu()->tablo('oturum')->hepsiniAl());
 
@@ -1735,7 +1732,7 @@ Vt::sor()->tablo('oturum')->ekle([
 ]);*/
 
 
-Vt::sorgu()->tablo('oturum')->nerede([ "kod" => "deneme"])->sil();
+//vt::sorgu()->tablo('oturum')->nerede([ "kod" => "deneme"])->sil();
 
 Oturum::set("elme","armut".uniqid());
 var_dump(Oturum::get("elme"));

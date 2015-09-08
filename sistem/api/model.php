@@ -123,14 +123,16 @@ class Model
 
     $kod ="";
     foreach ($dahiledilecektablolar as $tablo) {
-      if(is_file("sistem/cache/modeller/".$tablo.".php")){
-        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+      if(is_file(ROOT."model/".$tablo.".php")){
+        $kod.= substr(okuDosya("model/".$tablo.".php"), 5);
       }else{
-        yazDosya("sistem/cache/modeller/".$tablo.".php","class $tablo extends Model{
+        yazDosya("model/".$tablo.".php","<?php
+class $tablo extends Model{
           static protected ".'$_tableName'." = '$tablo';
 }
         ");
-        $kod.= okuDosya("sistem/cache/modeller/".$tablo.".php");
+        $kod.= substr(okuDosya("model/".$tablo.".php"), 5);
+
       }
   
     }    
@@ -319,10 +321,7 @@ class Model
     return static::fetchOneWhere(static::_quote_identifier(static::$_primary_column_name).' = ?',array($id));
   }
 
-  static public function al($id)
-  {
-    return static::getById($id);
-  }
+  static public function al($id){ return static::getById($id); }
   
   /**
    * Get the first record in the table

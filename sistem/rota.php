@@ -7,7 +7,7 @@ return array(
 				"kontrol" => "mainKontrol",
 				"get" => array(),
 				"post" => array(),
-				"validasyon" => array("H@csrf")
+				"validasyon" => array()
 			),
 
 		array(

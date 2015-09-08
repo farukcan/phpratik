@@ -8,7 +8,6 @@
 		// Oturum verilerin durumu kontrol eder, ve oturum sistemini aktifleştiri
 		static function check() {
 
-
 			if(isset($GLOBALS["_OTURUM"])) return $GLOBALS["phpratik_oturum_kodu"];
 
 			// bu class destruct olurken; eski oturum dosyası silinip yenisine yazılır
