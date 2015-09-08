@@ -4,7 +4,7 @@
 
 
 
-//var_dump(Vt::sorgu()->tablo('oturum')->hepsiniAl());
+//var_dump(Vt::sorgu()->tablo('oturum')->hepsiniAl());s
 
 /*
 Vt::sor()->tablo('oturum')->ekle([
@@ -30,7 +30,8 @@ Model::kullan();
 
 
 
-//$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new object
+
+//$kelime = kelimeler::hepsiniBul("lojik = 13"); // read category into a new objectssfd
 //$kelime->lojik = "13";
 //$kelime->save();
 //var_dump($kelime);
@@ -57,5 +58,3 @@ echo isset($ahmet) ? $ahmet : '<br>naber';
 ss
 gene html
 s
-<?php
-	//php kodları

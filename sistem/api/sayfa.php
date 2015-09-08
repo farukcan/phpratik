@@ -76,7 +76,7 @@ class Sayfa {
 
     static function yap($sayfa) //bu cached fonksiyondur
     {
-        return "?>".Sayfa::doldur(Sayfa::oku($sayfa),$sayfa)."<?php";
+        return "?>".Sayfa::doldur(Sayfa::oku($sayfa),$sayfa)."<?php ";
     }
 
     static function cache()
