@@ -1,0 +1,10 @@
+			{
+				"ad" : "Oturum",
+				"lisans" : "Kamu",
+				"not" : "",
+				"version": 1.00,
+				"gerekli_apiler" : [],
+				"ayar":true,
+				"cache":false,
+				"cacheonly":false
+			}

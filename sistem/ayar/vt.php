@@ -3,7 +3,7 @@ return array(
 
     'user'      => 'root',
     'pass'      => 'faruk',
-    'dbname'    => 'mysql',
+    'dbname'    => 'test',
     'host'      => 'localhost',
     'type'      => 'mysql',
     'charset'   => 'utf8',

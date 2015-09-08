@@ -2,9 +2,25 @@
 
 <?php
 
-Mcache::set("ben","sen");
 
-$d = Mcache::delete("ben");
+
+//var_dump(Vt::sorgu()->tablo('oturum')->hepsiniAl());
+
+/*
+Vt::sor()->tablo('oturum')->ekle([
+	"kod" => "denedsme",
+	"veri" => "deneme bilgi"
+]);*/
+
+
+Vt::sorgu()->tablo('oturum')->nerede([ "kod" => "deneme"])->sil();
+
+Oturum::set("elme","armut".uniqid());
+var_dump(Oturum::get("elme"));
+
+//Mcache::set("ben","sen");
+
+$d = Mcache::get("ben");
 var_dump($d);
 
 echo "<hr>";

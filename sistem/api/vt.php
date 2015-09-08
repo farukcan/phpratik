@@ -1,4 +1,5 @@
 <?php
+
 class Vt
 {
 	
@@ -116,6 +117,8 @@ class PDOx {
 		return $this;
 		
 	}
+	public function tablo($from) { return $this->from($from); }
+
 	
 	public function join($table, $field1, $op = '', $field2 = '', $join = 'INNER') {
 	
@@ -193,6 +196,7 @@ class PDOx {
 		return $this;
 		
 	}
+	public function nerede($where, $op = null, $val = null, $ao = 'AND') { return $this->where($where,$op,$val,$ao);}
 
 	public function orWhere($where, $op=null, $val=null) {
 	
@@ -398,6 +402,7 @@ class PDOx {
 		return $this->query($query, $array, false);
 		
 	}
+	public function al($array = false) { return $this->get($array); }
 
 	public function getAll($array = false) {
 	
@@ -438,6 +443,7 @@ class PDOx {
 		return $this->query($query, $array);
 		
 	}
+	public function hepsiniAl($array = false) { return $this->getAll($array); }
 
 	public function insert($data) {
 		
@@ -460,6 +466,7 @@ class PDOx {
 		}
 		
 	}
+	public function ekle($d) { return $this->insert($d); }
 
 	public function update($data) {
 	
@@ -519,6 +526,7 @@ class PDOx {
 		return $this->query($query);
 		
 	}
+	public function sil() { return $this->delete(); }
 	
 	public function query($query, $array = false, $all = true) {
 	
