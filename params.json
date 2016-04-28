@@ -1,6 +1,6 @@
 {
-  "name": "Phpratik",
+  "name": "phpratik",
   "tagline": "Basit ve pratik türk PHP Frameworku",
-  "body": "Phpratik framework için sayfa",
+  "body": "# phpratik\r\nBasit ve pratik türk PHP Frameworku\r\n\r\nMVC(ModelViewControl - ModelSayfaKontrol) yapısına sahip, kendi kodlarını değiştiren ve optimize eden, lazyload, basit ve pratik framework.\r\n\r\n**Kısacası şu işlere yarar**\r\n\r\nAz kod ile çok fonksiyonu yerine getirme.\r\n\r\nBüyük projelerin karmaşıklığı yok eden bir düzen ve sistematik.\r\n\r\nBackEnd(PHP) ile FrontEnd(HTML) kodlarının ayrılığı\r\n\r\nTasarımcılara hitap eden SayfaAPIsi\r\n\r\nVeritabanın basit bir şekilde nesneye dayalı kullanma.\r\n\r\nphpratik kullanıcıları tarafından oluşturan api kütüphaneleri\r\n\r\nDosyaların dahil(include) edilmesinde otomatiklik ve kolaylık.\r\n\r\nGüncellik ve güvenlilik.\r\n\r\n**Ayrıca phpratik GitHub üzerinde tutulduğu için sizde geliştirmelisine yardım edebilirsiniz.**\r\n\r\nhttps://github.com/farukcan/phpratik/wiki\r\n",
   "note": "Don't delete this file! It's used internally to help with page regeneration."
 }
