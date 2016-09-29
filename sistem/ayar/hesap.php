@@ -5,7 +5,7 @@ return array(
 		"usernameColumn" => "username",
 		"passwordColumn" => "password",
 		"yetkiColumn" => "yetkiler",
-		"yetkiler" = "adminlik",
+		"yetkiler" => "adminlik",
 		"hash" => "sha1" // veya md5 veya yok
 
 	);
