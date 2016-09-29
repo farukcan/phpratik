@@ -26,8 +26,6 @@ if(is_file($app->rotaFile) && !developer_mode) // Dosya var ve geliştirme modun
 else	
 	require 'sistem/fonksiyon/autoload.php'; // aksi taktirde, değişimler kontrol edilir.
 
-echo '<h4>Gecikme </h4>';
-var_dump ($app->runningTime()); // sistem çalışma hızı
 
 //-- SON
 
