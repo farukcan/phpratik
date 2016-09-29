@@ -2,10 +2,9 @@
 return array(
 		// hesap apisi ayarları
 		"model" => "user",
-		"usernameColumn" => "username",
-		"passwordColumn" => "password",
-		"yetkiColumn" => "yetkiler",
-		"yetkiler" => "adminlik",
+		"usernameColumn" => "username", //varchar
+		"passwordColumn" => "password", //varchar
+		"yetkiColumn" => "yetkiler", //varchar
 		"hash" => "sha1" // veya md5 veya yok
 
 	);

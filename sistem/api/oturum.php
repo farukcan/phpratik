@@ -32,10 +32,7 @@
 		// Oturum oluşturur. Her seferinde , eski veriler varsa bile yenilenmektedir.
 		static function create(){
 			if(!isset($GLOBALS["_OTURUM"])){
-				$GLOBALS["_OTURUM"] = array();
-				$GLOBALS["_OTURUM"]["ip"] = Oturum::ip();
-				$GLOBALS["_OTURUM"]["user-agent"] = $_SERVER['HTTP_USER_AGENT'];
-				$GLOBALS["_OTURUM"]["creation-time"] = time();
+				Oturum::temizle();
 			}
 
 			$GLOBALS["_OTURUM"]["zaman"] = time();
@@ -173,6 +170,13 @@
 			$GLOBALS["_OTURUM"][$degisken] = $veri;
 		}
 		static function set($v,$d) { return Oturum::yaz($v,$d); }
+
+		static function temizle(){
+				$GLOBALS["_OTURUM"] = array();
+				$GLOBALS["_OTURUM"]["ip"] = Oturum::ip();
+				$GLOBALS["_OTURUM"]["user-agent"] = $_SERVER['HTTP_USER_AGENT'];
+				$GLOBALS["_OTURUM"]["creation-time"] = time();
+		}
 
 		static function ip(){
 		    if(getenv("HTTP_CLIENT_IP")) {
